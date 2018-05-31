@@ -1,0 +1,2 @@
+python/add_bn_scale.py test/train_val.prototxt --sh=test/train_alex.sh --output_model=test/final.prototxt
+
