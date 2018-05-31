@@ -1,8 +1,0 @@
-python/add_bn_scale.py test_lenet/lenet_train_test.prototxt --sh=test_lenet/train_lenet_batch.sh
-
-python/merged_bn_scale.py test_lenet/lenet_train_test.prototxt.temp.pt test_lenet/lenet_solver_batch_iter_10000.caffemodel --output_model=test_lenet/lc.prototxt --output_weights=test_lenet/lc.caffemodel
-
-sh inq/INQ_LeNet.sh  
-
-python/merged_scale_conv.py test_lenet/quantized.prototxt test_lenet/solver_iter_9.caffemodel --output_model=test_lenet/output.prototxt --output_weights=test_lenet/output.caffemodel
-
