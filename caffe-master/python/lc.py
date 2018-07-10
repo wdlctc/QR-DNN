@@ -4,18 +4,18 @@ from PIL import Image
 import caffe
 
 
-net = caffe.Net('test_lenet/quantized.prototxt',
-		'test_lenet/solver_iter_9.caffemodel' , 
+net = caffe.Net('models/cnn-models-master/my_alexnet/final.prototxt',
+		'models/cnn-models-master/my_alexnet/final.caffemodel' , 
 		caffe.TEST)
 print dir(net)
-net.forward()
+#net.forward()
 #print [(k,v.data) for k,v in net.blobs.items()]
 #print [(k,v[0].data, v[1].data) for k,v in net.params.items()]
 #net.save('final.caffemodel');
 
 for k,v in net.params.items():
-	if  (~k.find('conv1')):
-		print  k,v[0].data
+	if  (~k.find('conv')):
+		print  k, np.max(v[0].data)
 
 """
 for k,v in net.blobs.items():

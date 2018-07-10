@@ -91,10 +91,10 @@ template <typename Dtype>
 void FcInqLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
     const vector<Blob<Dtype>*>& top) {
   // Trim layer input
-  //if (this->phase_ == TEST) {
+  if (this->phase_ == TEST) {
       this->QuantizeLayerInputs_cpu(bottom[0]->mutable_cpu_data(),
           bottom[0]->count());
-  //}
+  }
 
   // Do forward propagation
   const Dtype* bottom_data = bottom[0]->cpu_data();
@@ -109,9 +109,9 @@ void FcInqLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
         this->blobs_[1]->cpu_data(), (Dtype)1., top_data);
   }
   // Trim layer output
-  //if (this->phase_ == TEST) {
-  //  this->QuantizeLayerOutputs_cpu(top_data, top[0]->count());
-  //}
+  if (this->phase_ == TEST) {
+    this->QuantizeLayerOutputs_cpu(top_data, top[0]->count());
+  }
 }
 
 template <typename Dtype>

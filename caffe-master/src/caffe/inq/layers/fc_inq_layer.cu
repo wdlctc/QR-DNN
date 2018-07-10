@@ -11,10 +11,10 @@ template <typename Dtype>
 void FcInqLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   // Trim layer input
-  //if (this->phase_ == TEST) {
+  if (this->phase_ == TEST) {
       this->QuantizeLayerInputs_gpu(bottom[0]->mutable_gpu_data(),
           bottom[0]->count());
-  //}
+  }
 
   // Do forward propagation
   const Dtype* bottom_data = bottom[0]->gpu_data();
@@ -38,9 +38,9 @@ void FcInqLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
                             top_data);
   }
   // Trim layer output
-  //if (this->phase_ == TEST) {
-  //  this->QuantizeLayerOutputs_gpu(top_data, top[0]->count());
-  //}
+  if (this->phase_ == TEST) {
+    this->QuantizeLayerOutputs_gpu(top_data, top[0]->count());
+  }
 }
 
 template <typename Dtype>

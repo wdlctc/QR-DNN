@@ -217,12 +217,12 @@ template <typename Dtype>
 void ConvolutionInqLayer<Dtype>::Forward_cpu(
       const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   // Trim layer input
-  //if (this->phase_ == TEST) {
+  if (this->phase_ == TEST) {
     for (int i = 0; i < bottom.size(); ++i) {
       this->QuantizeLayerInputs_cpu(bottom[i]->mutable_cpu_data(),
           bottom[i]->count());
     }
-  //}
+  }
 
   // Do forward propagation
   const Dtype* weight = this->blobs_[0]->cpu_data();
@@ -238,9 +238,9 @@ void ConvolutionInqLayer<Dtype>::Forward_cpu(
       }
     }
     // Trim layer output
-    //if (this->phase_ == TEST) {
-    //  this->QuantizeLayerOutputs_cpu(top_data, top[i]->count());
-    //}
+    if (this->phase_ == TEST) {
+      this->QuantizeLayerOutputs_cpu(top_data, top[i]->count());
+    }
   }
 }
 

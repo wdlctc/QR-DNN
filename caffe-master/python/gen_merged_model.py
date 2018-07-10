@@ -220,6 +220,7 @@ def main(args):
 
     # Store params
     net.save(args.output_weights)
+    os.remove(args.model + '.temp.pt')
 
 
 if __name__ == '__main__':

@@ -14,7 +14,15 @@ def load_and_fill_biases(src_model, src_weights, dst_model, dst_weights):
     with open(src_model) as f:
         model = caffe.proto.caffe_pb2.NetParameter()
         pb.text_format.Merge(f.read(), model)
-
+        
+    for i, layer in enumerate(model.layer):
+        if layer.type == 'Convolution': # or layer.type == 'Scale':
+            # Add bias layer if needed
+            if layer.convolution_param.bias_term == False:
+                layer.convolution_param.bias_term = True
+                layer.convolution_param.bias_filler.type = 'constant'
+                layer.convolution_param.bias_filler.value = 0.0
+                
     with open(dst_model, 'w') as f:
         f.write(pb.text_format.MessageToString(model))
 
@@ -24,6 +32,14 @@ def load_and_fill_biases(src_model, src_weights, dst_model, dst_weights):
     for key in net_src.params.keys():
         for i in range(len(net_src.params[key])):
             net_dst.params[key][i].data[:] = net_src.params[key][i].data[:]
+        
+    for i, layer in enumerate(model.layer):
+        if layer.type == 'Convolution': # or layer.type == 'Scale':
+            # Add bias layer if needed
+            if layer.convolution_param.bias_term == False:
+                layer.convolution_param.bias_term = True
+                layer.convolution_param.bias_filler.type = 'constant'
+                layer.convolution_param.bias_filler.value = 0.0
 
     if dst_weights is not None:
         # Store params
@@ -73,7 +89,8 @@ def merge_conv_and_bn(net, i_conv, i_bn, i_scale):
 	scale = alpha / alpha_power_of_2
         #print sum(alpha)/len(alpha)
         net.params[key_scale][0].data[:] = alpha_power_of_2
-        net.params[key_scale][1].data[:] = bias
+        del(net.params[key_scale][1])
+        #net.params[key_scale][1].data[:] = bias
     else:
         print 'Combine {:s} + {:s}'.format(key_conv, key_bn)
         scale_weight = 1
@@ -85,7 +102,7 @@ def merge_conv_and_bn(net, i_conv, i_bn, i_scale):
     #print len(conv_bias),len(scale),len(weight[0])
     try:
         conv_bias = copy_double(net.params[key_conv][1].data)
-	net.params[key_conv][1].data[:] = conv_bias *  scale
+	net.params[key_conv][1].data[:] = conv_bias *  scale + bias / alpha_power_of_2
     except:
 	pass
     for i in range(len(alpha)):
@@ -165,7 +182,7 @@ def process_model(net, src_model, dst_model, func_loop, func_finally):
     map(lambda x: x(net, model), func_finally)
 
     output=pb.text_format.MessageToString(model)
-    output=output.replace('scale_param','param {lr_mult: 0}\n  param {lr_mult: 0}\n  scale_param')
+    output=output.replace('scale_param','param {lr_mult: 0}\n  scale_param')
     print output
 
     with open(dst_model, 'w') as f:
@@ -178,15 +195,22 @@ def pick_empty_layers(layer, net, model, i):
     #print layer.type
     if layer.type not in ['BatchNorm', 'Scale']:
         return
+    
+    print layer.bottom[0],layer.top[0],layer.name,i
+    print model.layer[i+1].name
 
     bottom = layer.bottom[0]
     top = layer.top[0]
 
-    if (bottom != top):
-        # Not supperted yet
-        return
+    if layer.type == 'Scale':
+    
+        model.layer[i].scale_param.bias_term = False    
 
     if layer.type == 'BatchNorm':
+
+	if (bottom != top):
+	    model.layer[i+1].bottom[0] = bottom
+
 	#print net.params[layer.name][0].data,net.params[layer.name][1].data,net.params[layer.name][2].data
         zero_mean = np.all(net.params[layer.name][0].data == 0)
         one_var = np.all(net.params[layer.name][1].data == 1)
@@ -223,8 +247,6 @@ def main(args):
     if args.output_weights is None:
         file_name = osp.splitext(args.weights)[0]
         args.output_weights = file_name + '_inference.caffemodel'
-    if args.mode is None:
-	args.mode = 'Power-of-two'
 
     net = load_and_fill_biases(args.model, args.weights, args.model + '.temp.pt', None)
 
@@ -243,6 +265,5 @@ if __name__ == '__main__':
     parser.add_argument('weights', help="The weights caffemodel")
     parser.add_argument('--output_model')
     parser.add_argument('--output_weights')
-    parser.add_argument('--mode')
     args = parser.parse_args()
     main(args)

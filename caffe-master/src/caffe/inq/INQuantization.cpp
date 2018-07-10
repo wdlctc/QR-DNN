@@ -229,12 +229,13 @@ void INQuantization::Trim2FixedPoint_cpu(float* data,
     if (fabs(data[index])  >= thread){
 	mask[index] = 0;
         //data[index]=data[index]*0.9;
-        float max_data = (pow(2, 8 - 1) - 1) * pow(2, -fl);
-        float min_data = -pow(2, 8 - 1) * pow(2, -fl);
+        float max_data = (pow(2, 8 - 1) - 1) * pow(2, fl);
+        float min_data = -pow(2, 8 - 1) * pow(2, fl);
         data[index] = std::max(std::min(data[index], max_data), min_data);
         // Round data
-        data[index] /= pow(2, -fl);
+        data[index] /= pow(2, fl);
 	data[index] = round(data[index]);
+	data[index] *= pow(2, fl);
     }
     else {
 	mask[index] = 1;
@@ -254,7 +255,7 @@ void INQuantization::INQ(caffe::shared_ptr<Net<float> > caffe_net, float per){
   caffe::ReadNetParamsFromTextFileOrDie(model_, &param);
   for (int i = 0; i < param.layer_size(); ++i) {
     LOG(INFO) << "layer_names_[" << i <<"] = " << param.layer(i).name();
-    LOG(INFO) << "il_params[" << i << "] = " << GetIntegerLengthParams(param.layer(i).name());
+    //LOG(INFO) << "il_params[" << i << "] = " << GetIntegerLengthParams(param.layer(i).name());
     int il_param = GetIntegerLengthParams(param.layer(i).name());
     //int io_param = GetIntegerLengthOut(param.layer(i).name());
 
@@ -275,11 +276,31 @@ void INQuantization::INQ(caffe::shared_ptr<Net<float> > caffe_net, float per){
         LOG(INFO) << "min param = " << blob_sorted[0];
         LOG(INFO) << "max param = " << blob_sorted[count-1];
         LOG(INFO) << "thread param = " << thread << " i = " << int(count * (1-per));
+        int fl = il_param - 8;
+        float max_data = (pow(2, 8 - 1) - 1) * pow(2, fl);
+        float min_data = -pow(2, 8 - 1) * pow(2, fl);
+        LOG(INFO) << "Fl = " << fl << " il = " << il_param;
+        LOG(INFO) << "UP_LIMIT = " << max_data << " LOW_LIMIT = "<< min_data;
         //for (int k = 0; k < count; ++k) LOG(INFO) << "data = "<< blob_sorted[k];
         blob_sorted.clear();
-        Trim2IntegerPowerOf2_cpu(blob_pre , count , thread,
-        il_param, il_param-7+1,
-        caffe_layer->blobs()[0]->mutable_cpu_mask());
+
+        if (trimming_mode_ == "integer_power_of_2_weights") {
+        
+            Trim2IntegerPowerOf2_cpu(blob_pre , count , thread,
+                                     il_param, il_param-7+1,
+                                     caffe_layer->blobs()[0]->mutable_cpu_mask());
+        }
+        else if (trimming_mode_ == "dynamic_fixed_point") {
+            
+            Trim2FixedPoint_cpu(blob_pre , count , thread,
+                                il_param-7,
+                                caffe_layer->blobs()[0]->mutable_cpu_mask());
+        } 
+        
+        
+        //Trim2IntegerPowerOf2_cpu(blob_pre , count , thread,
+        //il_param, il_param-7+1,
+        //caffe_layer->blobs()[0]->mutable_cpu_mask());
 /*
 	if(caffe_layer->blobs().size()>1){
 	        count = caffe_layer->blobs()[1]->count();

@@ -10,12 +10,12 @@ template <typename Dtype>
 void ConvolutionInqLayer<Dtype>::Forward_gpu(
       const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
   // Trim layer input
-  //if (this->phase_ == TEST) {
+  if (this->phase_ == TEST) {
     for (int i = 0; i < bottom.size(); ++i) {
       this->QuantizeLayerInputs_gpu(bottom[i]->mutable_gpu_data(),
           bottom[i]->count());
     }
-  //}
+  }
 
   // Do forward propagation
   const Dtype* weight = this->blobs_[0]->gpu_data();
@@ -31,9 +31,9 @@ void ConvolutionInqLayer<Dtype>::Forward_gpu(
       }
     }
     // Trim layer output
-    //if (this->phase_ == TEST) {
-    //  this->QuantizeLayerOutputs_gpu(top_data, top[i]->count());
-    //}
+    if (this->phase_ == TEST) {
+      this->QuantizeLayerOutputs_gpu(top_data, top[i]->count());
+    }
   }
 }
 

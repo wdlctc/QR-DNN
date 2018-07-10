@@ -19,15 +19,28 @@ def add_bn_scale(src_model, dst_model):
 
     pd = True     
 
+    top0 = None
+    top1 = None
+
     for i, layer in enumerate(model.layer):
 	
 	top = layer.top[0]
+	
+	try:
+	    bottom = layer.bottom[0]
+	except:
+	    bottom = None
+	
+	if top0 != None:
+	    
+	    if top == top0:
+	        model.layer[i].top[0] = top + layer.type
+	        model.layer[i+1].bottom[0] = top + layer.type
+	    else :
+	        top0=None
+	    
+	    
 	name = layer.name
-        #if layer.type == 'Convolution' :
-            # Add bias layer if needed
-	    #del layer.param[1]
-            #if layer.convolution_param.bias_term == True:
-                #layer.convolution_param.bias_term = False
 
 	if layer.type == 'LRN':
 	    bottom = layer.bottom[0]
@@ -48,26 +61,30 @@ def add_bn_scale(src_model, dst_model):
 	if layer.type == 'Convolution':
 	    bn = model_dst.layer.add()
 	    bn.CopyFrom(caffe.layers.BatchNorm(use_global_stats=False).to_proto().layer[0])
-	    bn.name = name.replace('conv','bn')
-	    bn.top[0] = top
+	    bn.name = name + 'bn'
+	    bn.top[0] = top + 'bn'
 	    bn.bottom.append(top)
 	    scale = model_dst.layer.add()
 	    scale.CopyFrom(caffe.layers.Scale(bias_term=True).to_proto().layer[0])
-	    scale.name = layer.name.replace('conv','scale')
-	    scale.bottom.append(top)
-	    scale.top[0] = top
+	    scale.name = layer.name + 'scale'
+	    scale.bottom.append(top + 'bn')
+	    scale.top[0] = top + 'scale'
+	    model.layer[i+1].bottom[0] = top + 'scale'
+            top0 = top
 
 	if layer.type == 'InnerProduct' and layer.inner_product_param.num_output != 1000  and layer.inner_product_param.num_output != 10: 
 	    bn = model_dst.layer.add()
 	    bn.CopyFrom(caffe.layers.BatchNorm(use_global_stats=False).to_proto().layer[0])
 	    bn.name = name + 'bn'
-	    bn.top[0] = top
+	    bn.top[0] = top + 'bn'
 	    bn.bottom.append(top)
 	    scale = model_dst.layer.add()
 	    scale.CopyFrom(caffe.layers.Scale(bias_term=True).to_proto().layer[0])
 	    scale.name = layer.name + 'scale'
-	    scale.bottom.append(top)
-	    scale.top[0] = top
+	    scale.bottom.append(top + 'bn')
+	    scale.top[0] = top + 'scale'
+	    model.layer[i+1].bottom[0] = top + 'scale'
+	    top0 = top
 
     with open(dst_model, 'w') as f:
 	if pd is True:

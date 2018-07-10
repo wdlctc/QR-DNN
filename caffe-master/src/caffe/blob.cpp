@@ -212,10 +212,10 @@ void Blob<Dtype>::Update() {
   case SyncedMemory::HEAD_AT_CPU:
     // perform computation on CPU
 
-    //caffe_mul<Dtype>(count_, 
-        //static_cast<const Dtype*>(mask_->cpu_data()),
-	//static_cast<const Dtype*>(diff_->cpu_data()),
-        //static_cast<Dtype*>(diff_->mutable_cpu_data()));
+    caffe_mul<Dtype>(count_, 
+        static_cast<const Dtype*>(mask_->cpu_data()),
+	static_cast<const Dtype*>(diff_->cpu_data()),
+        static_cast<Dtype*>(diff_->mutable_cpu_data()));
     caffe_axpy<Dtype>(count_, Dtype(-1),
         static_cast<const Dtype*>(diff_->cpu_data()),
         static_cast<Dtype*>(data_->mutable_cpu_data()));
@@ -225,10 +225,10 @@ void Blob<Dtype>::Update() {
 #ifndef CPU_ONLY
     // perform computation on GPU
 
-    //caffe_gpu_mul<Dtype>(count_, 
-        //static_cast<const Dtype*>(mask_->gpu_data()),
-	//static_cast<const Dtype*>(diff_->gpu_data()),
-        //static_cast<Dtype*>(diff_->mutable_gpu_data()));
+    caffe_gpu_mul<Dtype>(count_, 
+        static_cast<const Dtype*>(mask_->gpu_data()),
+	static_cast<const Dtype*>(diff_->gpu_data()),
+        static_cast<Dtype*>(diff_->mutable_gpu_data()));
     caffe_gpu_axpy<Dtype>(count_, Dtype(-1),
         static_cast<const Dtype*>(diff_->gpu_data()),
         static_cast<Dtype*>(data_->mutable_gpu_data()));
