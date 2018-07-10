@@ -11,7 +11,7 @@ Code example for the FPL 2018 short paper. We modify the original [caffe](http:/
 ## QR-DNN usage
 
 ### Command to train a fixed-point AlexNet with 8-bit actiavtions and weight,
-`python Top.py
+`python Top.py`
 
 ### Command to train a logrithmic AlexNet with 8-bit actiavtions and 4-bit weight,
-`python Top.py
+`python Top.py`
