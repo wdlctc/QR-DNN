@@ -1,0 +1,15 @@
+test_iter: 1000
+test_interval: 1000
+base_lr: 0.005
+max_iter: 80000
+lr_policy: "step"
+gamma: 0.1
+stepsize: 20000
+display: 200
+weight_decay: 0.0005
+snapshot: 80000
+snapshot_prefix: "test/alexnet_cvgj"
+solver_mode: GPU
+random_seed: 0
+net: "test/train_val.First.prototxt"
+test_initialization: false
