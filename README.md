@@ -1,6 +1,6 @@
-# Quantization and Reconstruction algorithm for Quantized and Reconstructed Deep Neural Networks" 
+# Quantization and Reconstruction algorithm for Quantized and Reconstructed Deep Neural Networks
 
-Code example for the FPL 2018 short paper. We modify the original [caffe](http://caffe.berkeleyvision.org/) to implement our QR-DNN algorithm. And we also thank the example code provied by [Ristretto](http://ristretto.lepsucd.com/)
+Code example for the FPL 2018 short paper. We modify the original [caffe](http://caffe.berkeleyvision.org/) to implement our QR-DNN algorithm. And we also thank the example code provied by [Ristretto](http://ristretto.lepsucd.com/).
 
 ## Prerequisites
 - NVIDIA GPU + CUDA + CuDNN
