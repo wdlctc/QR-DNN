@@ -12,6 +12,7 @@ Code example for the FPL 2018 short paper. We modify the original [caffe](http:/
 
 ### Preparsion
 `make all`
+
 `make pycaffe`
 
 ### Command to generate a fixed-point AlexNet model with 8-bit actiavtions and weight,
