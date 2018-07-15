@@ -10,6 +10,10 @@ Code example for the FPL 2018 short paper. We modify the original [caffe](http:/
 
 ## QR-DNN usage
 
+### Preparsion
+`make all`
+`make pycaffe`
+
 ### Command to train a fixed-point AlexNet with 8-bit actiavtions and weight,
 `python python/merge_all.py --model=test/train_val.prototxt  --mode=dynamic_fixed_point --solver_first=test/train_alex.solver`
 
