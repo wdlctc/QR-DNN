@@ -114,20 +114,20 @@ def main(args):
             fl_param = int(np.ceil(np.log2(np.max(net.params[name][0].data)))) + 1 ;
             #print fl_param, np.max(net.params[name][0].data)
             
-            #if 'Convolution' in layer.type and name != "conv1" : layer.type = 'ConvolutionInq'
+            if 'Convolution' in layer.type and name != "conv1"  : layer.type = 'ConvolutionInq'
             #if 'InnerProduct' in layer.type : layer.type = 'FcInq'
             layer.quantization_param.precision = 0
-            layer.quantization_param.bw_layer_in = args.width_data
-            layer.quantization_param.fl_layer_in = args.width_data - fl_layer_in
-            layer.quantization_param.bw_layer_out = args.width_data
-            layer.quantization_param.fl_layer_out = args.width_data - fl_layer_out
-            layer.quantization_param.bw_params = args.width_weight
-            layer.quantization_param.fl_params = args.width_weight - fl_param
+            layer.quantization_param.bw_layer_in = int(args.width_data)
+            layer.quantization_param.fl_layer_in = int(args.width_data) - fl_layer_in
+            layer.quantization_param.bw_layer_out = int(args.width_data)
+            layer.quantization_param.fl_layer_out = int(args.width_data) - fl_layer_out
+            layer.quantization_param.bw_params = int(args.width_weight)
+            layer.quantization_param.fl_params = int(args.width_weight) - fl_param
             
             scale = 2 ** layer.quantization_param.fl_params
             scale_bias = 2 ** layer.quantization_param.fl_layer_out
             try :
-                print np.max(np.round( net.params[name][0].data[:] * scale))
+                #print np.max(np.round( net.params[name][0].data[:] * scale))
                 net.params[name][0].data[:] = np.round( net.params[name][0].data[:] * scale) / scale
                 net.params[name][1].data[:] = np.round( net.params[name][1].data[:] * scale_bias) / scale_bias
                 pass
